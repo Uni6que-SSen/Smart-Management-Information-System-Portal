@@ -1,0 +1,137 @@
+/* ==========================================================================
+   PARUL UNIVERSITY ERP - DESIGN TOKENS & SYSTEM VARIABLES
+   ========================================================================== */
+
+:root {
+  /* University Brand Identity */
+  --pu-maroon-primary: #800020;
+  --pu-maroon-dark: #560319;
+  --pu-maroon-light: #9E1B32;
+  --pu-crimson: #B91C1C;
+  --pu-navy: #0F172A;
+  --pu-navy-dark: #0A0F1D;
+  --pu-navy-light: #1E293B;
+  --pu-gold: #D97706;
+  --pu-gold-light: #FBBF24;
+  --pu-gold-accent: #F59E0B;
+
+  /* ==========================================
+     Curated Parul University Gradient Tokens
+     ========================================== */
+  /* 1. Flagship: Royal Crimson & Imperial Gold */
+  --gradient-royal-crimson: linear-gradient(135deg, #6B081D 0%, #9E1B32 55%, #D97706 100%);
+  --gradient-primary: linear-gradient(135deg, #7A1024 0%, #B91C1C 55%, #D97706 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #5B0617 0%, #9E1B32 55%, #B45309 100%);
+
+  /* 2. Executive: Midnight Obsidian & Wine */
+  --gradient-midnight-wine: linear-gradient(135deg, #4A0615 0%, #200D28 45%, #0F172A 100%);
+  --gradient-hero: linear-gradient(135deg, #450513 0%, #1A0B2E 48%, #0F172A 100%);
+
+  /* 3. Accreditations: Sunburst Amber & NAAC Gold */
+  --gradient-gold: linear-gradient(135deg, #D97706 0%, #F59E0B 50%, #FBBF24 100%);
+  --gradient-gold-hover: linear-gradient(135deg, #B45309 0%, #D97706 50%, #F59E0B 100%);
+
+  /* 4. Technology: Cyber Cobalt & Electric Royal */
+  --gradient-cobalt: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #06B6D4 100%);
+
+  /* 5. Health & Compliance: Emerald Metric */
+  --gradient-success: linear-gradient(90deg, #047857 0%, #10B981 60%, #34D399 100%);
+  --gradient-danger: linear-gradient(90deg, #991B1B 0%, #DC2626 60%, #F87171 100%);
+
+  /* Decorative Rainbow Accent Border */
+  --gradient-shimmer-strip: linear-gradient(90deg, #9E1B32 0%, #D97706 33%, #2563EB 66%, #10B981 100%);
+
+  /* Semantic State Colors */
+  --color-success: #10B981;
+  --color-success-bg: rgba(16, 185, 129, 0.12);
+  --color-success-border: rgba(16, 185, 129, 0.3);
+
+  --color-warning: #F59E0B;
+  --color-warning-bg: rgba(245, 158, 11, 0.12);
+  --color-warning-border: rgba(245, 158, 11, 0.3);
+
+  --color-danger: #EF4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --color-danger-border: rgba(239, 68, 68, 0.3);
+
+  --color-info: #0284C7;
+  --color-info-bg: rgba(2, 132, 199, 0.12);
+  --color-info-border: rgba(2, 132, 199, 0.3);
+
+  /* Typography */
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout dimensions */
+  --topbar-height: 70px;
+  --sidebar-width: 270px;
+  --sidebar-collapsed-width: 80px;
+
+  /* Light Theme (Default) */
+  --bg-app: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-subtle: #F1F5F9;
+  --bg-hover: #E2E8F0;
+  
+  --border-subtle: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --border-focus: var(--pu-maroon-primary);
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-inverse: #FFFFFF;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px rgba(128, 0, 32, 0.2);
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-blur: blur(12px);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-app: #070B14;
+  --bg-surface: #0F172A;
+  --bg-surface-elevated: #162035;
+  --bg-subtle: #1E293B;
+  --bg-hover: #26354D;
+
+  --border-subtle: #1E293B;
+  --border-strong: #334155;
+  --border-focus: var(--pu-gold-light);
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-inverse: #070B14;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 25px 30px -5px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 25px rgba(217, 119, 6, 0.25);
+
+  --glass-bg: rgba(15, 23, 42, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(14px);
+}

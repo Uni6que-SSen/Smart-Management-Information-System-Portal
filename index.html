@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Management Information System Portal</title>
+  <meta name="description" content="Official Smart Management Information System (SMIS) Portal for Parul University, Vadodara. Role-based isolation, 1-hour inactivity security, real-time attendance sync, and automated official grade card generation.">
+
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Application Stylesheets (Cache-busted v=4.4) -->
+  <link rel="stylesheet" href="css/variables.css?v=4.4">
+  <link rel="stylesheet" href="css/main.css?v=4.4">
+  <link rel="stylesheet" href="css/auth.css?v=4.4">
+  <link rel="stylesheet" href="css/portals.css?v=4.4">
+  <link rel="stylesheet" href="css/print.css?v=4.4">
+</head>
+<body>
+
+  <!-- APP ROOT SHELL -->
+  <div id="app-root">
+
+    <!-- TOPBAR (Visible when logged in) -->
+    <header class="topbar" id="app-topbar" style="display: none;">
+      <!-- University Brand -->
+      <div class="brand-section">
+        <img src="assets/parul_logo.jpg" alt="Parul University Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>PARUL UNIVERSITY</h1>
+          <div class="brand-subtitle">Smart Management Information System Portal</div>
+        </div>
+      </div>
+
+      <!-- Center Controls: Real-time sync + 1-Hour Inactivity Countdown -->
+      <div class="center-controls">
+        <div class="sync-status-indicator">
+          <span class="sync-dot"></span>
+          <span>Live Sync Connected</span>
+        </div>
+
+        <!-- 1-Hour Countdown Widget -->
+        <div class="session-timer-widget" id="session-countdown-pill" title="Security Compliance: Session terminates after 1 hour of inactivity">
+          <span class="timer-icon">⏱️</span>
+          <span>Session: <strong>01:00:00</strong></span>
+        </div>
+      </div>
+
+      <!-- Right Controls: Persona Quick Switcher, Debug Tools, Profile & Theme -->
+      <div class="topbar-right">
+        <!-- Strict Role Isolation: Displays ONLY the active role (Student, Faculty, or Admin) -->
+        <div id="active-role-container"></div>
+
+        <!-- Quick 1-Hour Timeout Simulator for Graders/Reviewers -->
+        <button class="btn btn-secondary btn-sm" onclick="AuthEngine.simulateTimeoutNow()" title="Simulate 1-hour inactivity timeout immediately">
+          ⚡ Test 1-Hour Timeout
+        </button>
+
+        <!-- Theme Switcher -->
+        <button class="btn-icon" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+          🌙
+        </button>
+
+        <!-- User Profile Pill -->
+        <div class="user-profile-pill">
+          <div class="user-avatar" id="topbar-user-avatar">AM</div>
+          <div class="user-meta">
+            <span class="user-name" id="topbar-user-name">Aarav Mehta</span>
+            <span class="user-role-label" id="topbar-user-role">STUDENT &bull; 210303105001</span>
+          </div>
+        </div>
+
+        <!-- Sign Out Button -->
+        <button class="btn btn-secondary btn-sm" onclick="AuthEngine.signOut('user_initiated')">
+          Sign Out
+        </button>
+      </div>
+    </header>
+
+    <!-- AUTHENTICATION CONTAINER (Visible when logged out) -->
+    <div id="auth-container" class="auth-page">
+      <div class="auth-split-layout">
+        <!-- Left Hero Showcase Pane -->
+        <div class="auth-hero-pane">
+          <div class="auth-hero-overlay"></div>
+          <div class="auth-hero-content">
+            <div class="auth-hero-header">
+              <img src="assets/parul_logo.jpg" alt="Parul University Logo" class="auth-hero-crest">
+              <div class="auth-hero-titles">
+                <h2>PARUL UNIVERSITY</h2>
+                <p>Knowledge &bull; Discipline &bull; Discovery</p>
+              </div>
+            </div>
+
+            <div class="auth-hero-body">
+              <h1 class="auth-hero-tagline">Smart Management Information System Portal</h1>
+              <p class="auth-hero-description">
+                Experience next-generation academic management with strict role-based access isolation, real-time academic tracking, automated grade card publishing, and intelligent campus workflows.
+              </p>
+
+              <div class="auth-hero-stats">
+                <div class="auth-stat-box">
+                  <h4>NAAC A++</h4>
+                  <p>Highest Grade Accreditation</p>
+                </div>
+                <div class="auth-stat-box">
+                  <h4>50,000+</h4>
+                  <p>Students Across 250+ Programs</p>
+                </div>
+                <div class="auth-stat-box">
+                  <h4>150+ Acres</h4>
+                  <p>Hi-Tech Digital Campus</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="auth-hero-footer">
+              <span>&copy; 2026 Parul University. All Rights Reserved.</span>
+              <span>Vadodara, Gujarat, India</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Form Pane -->
+        <div class="auth-form-pane">
+          <div class="auth-card">
+            <!-- 1-Hour Timeout Banner (Shows if ?session_expired=true) -->
+            <div class="session-expired-banner" id="session-expired-banner">
+              <span>⚠️</span>
+              <div>
+                <strong>Session Terminated:</strong> You were signed out automatically due to 1 hour of inactivity. Please authenticate to resume.
+              </div>
+            </div>
+
+            <div class="auth-card-header">
+              <h2 class="auth-title">Welcome to Parul University</h2>
+              <p class="auth-desc">Select your institutional role to access your dedicated portal.</p>
+            </div>
+
+            <!-- Role Segmented Controls -->
+            <div class="role-segmented-control" id="auth-role-control">
+              <div class="role-pill active" data-role="STUDENT" onclick="selectAuthRole('STUDENT')">🎓 Student</div>
+              <div class="role-pill" data-role="FACULTY" onclick="selectAuthRole('FACULTY')">👨‍🏫 Faculty</div>
+              <div class="role-pill" data-role="ADMIN" onclick="selectAuthRole('ADMIN')">🛡️ Admin</div>
+            </div>
+
+            <!-- Mode Tabs (Sign In / Register) -->
+            <div class="auth-mode-tabs">
+              <div class="auth-mode-tab active" id="tab-mode-signin" onclick="selectAuthMode('signin')">Sign In</div>
+              <div class="auth-mode-tab" id="tab-mode-signup" onclick="selectAuthMode('signup')">Sign Up / Register</div>
+            </div>
+
+            <!-- SIGN IN FORM -->
+            <form id="form-signin" onsubmit="handleSignInSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">
+                  <span id="signin-label-id">Institutional Identifier (Enrollment No / Email)</span>
+                </label>
+                <input type="text" id="signin-identifier" class="form-control" placeholder="e.g. 210303105001" required value="210303105001">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <span>Account Password</span>
+                  <a href="#" style="font-size: 11.5px;">Forgot Password?</a>
+                </label>
+                <input type="password" id="signin-password" class="form-control" placeholder="••••••••" required value="password123">
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; font-size: 13px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" checked> Remember session
+                </label>
+                <span style="font-size: 11.5px; color: var(--text-muted);">1-hour idle timeout active</span>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                Secure Institutional Sign In
+              </button>
+            </form>
+
+            <!-- SIGN UP / REGISTRATION FORM -->
+            <form id="form-signup" style="display: none;" onsubmit="handleSignUpSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="signup-name" class="form-control" placeholder="e.g. Aarav Mehta" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Institutional Email</label>
+                <input type="email" id="signup-email" class="form-control" placeholder="name@paruluniversity.ac.in" required>
+              </div>
+
+              <!-- Student Specific: Requires Roll No / Enrollment No verification -->
+              <div id="signup-student-fields">
+                <div class="form-group">
+                  <label class="form-label">
+                    <span>Enrollment Number (Requires Master DB Match)</span>
+                    <span class="badge badge-info" style="font-size: 10px;">Verified Roster</span>
+                  </label>
+                  <input type="text" id="signup-enr-no" class="form-control" placeholder="e.g. 210303105099" value="210303105099">
+                  <small style="color: var(--text-muted); font-size: 11.5px; margin-top: 4px; display: block;">
+                    * Validated against Academic Council Master Registry (Try: 210303105099)
+                  </small>
+                </div>
+              </div>
+
+              <!-- Faculty Specific: Requires Employee ID verification -->
+              <div id="signup-faculty-fields" style="display: none;">
+                <div class="form-group">
+                  <label class="form-label">
+                    <span>Employee ID (HR Registry)</span>
+                    <span class="badge badge-gold" style="font-size: 10px;">Faculty Match</span>
+                  </label>
+                  <input type="text" id="signup-emp-id" class="form-control" placeholder="e.g. PU-FAC-5520" value="PU-FAC-5520">
+                  <small style="color: var(--text-muted); font-size: 11.5px; margin-top: 4px; display: block;">
+                    * Validated against Registrar's Faculty Roster (Try: PU-FAC-5520)
+                  </small>
+                </div>
+              </div>
+
+              <!-- Admin Notice: Master Super-Admin restricted -->
+              <div id="signup-admin-notice" style="display: none; padding: 16px; background: rgba(128, 0, 32, 0.1); border-radius: var(--radius-md); border: 1px solid rgba(128, 0, 32, 0.25); margin-bottom: 16px;">
+                <div style="font-weight: 700; color: var(--pu-maroon-primary); margin-bottom: 4px;">Super-Admin Clearance Restricted</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">
+                  Admin accounts cannot be self-registered. Credentials must be provisioned directly by the Chief Academic Administrator and Registrar's office.
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Create Password</label>
+                <input type="password" id="signup-password" class="form-control" placeholder="••••••••" required value="SecurePass@2026">
+              </div>
+
+              <button type="submit" id="btn-signup-submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                Verify & Complete Registration
+              </button>
+            </form>
+
+            <!-- Sign In Page Footer (Second Picture): Official University Emblem Banner -->
+            <footer class="signin-page-footer">
+              <img src="assets/parul_footer_banner.png" alt="Parul University Official Crest Banner" class="signin-footer-banner">
+              <div class="signin-footer-meta">
+                <span>Parul University &bull; P.O. Limda, Ta. Waghodia, Dist. Vadodara - 391760, Gujarat, India</span>
+              </div>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTAINER (When logged in) -->
+    <div id="dashboard-container" class="dashboard-container" style="display: none;">
+      <main class="main-content" id="portal-view-container">
+        <!-- Rendered dynamically by student-portal.js, faculty-portal.js, or admin-portal.js -->
+      </main>
+    </div>
+
+  </div>
+
+  <!-- 1-HOUR INACTIVITY WARNING MODAL -->
+  <div class="modal-overlay" id="inactivity-warning-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 style="display: flex; align-items: center; gap: 10px; font-size: 18px; color: #DC2626;">
+          ⚠️ Inactivity Security Alert
+        </h3>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14.5px; line-height: 1.6; margin-bottom: 16px;">
+          You have been inactive for over <strong>55 minutes</strong>. To preserve institutional data integrity and comply with university security standards, your session will automatically terminate in:
+        </p>
+        <div style="font-family: var(--font-mono); font-size: 42px; font-weight: 800; color: #DC2626; text-align: center; margin: 20px 0; letter-spacing: 2px;" id="modal-timeout-countdown">
+          05:00
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); text-align: center;">
+          Clicking "Keep Me Signed In" or moving your mouse will reset your 1-hour timer.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="AuthEngine.signOut('user_initiated')">
+          Sign Out Now
+        </button>
+        <button class="btn btn-primary" onclick="AuthEngine.resetInactivityTimer()">
+          ✓ Keep Me Signed In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFICIAL GRADE CARD & REPORT CARD MODAL (Printable PDF) -->
+  <div class="modal-overlay" id="grade-card-modal">
+    <div class="modal-dialog" style="max-width: 900px;">
+      <div class="modal-header no-print">
+        <h3 style="font-size: 18px; display: flex; align-items: center; gap: 8px;">
+          📜 Official University Grade Transcript
+        </h3>
+        <button class="btn-icon" onclick="document.getElementById('grade-card-modal').classList.remove('active')">&times;</button>
+      </div>
+      <div class="modal-body" id="grade-card-render-target">
+        <!-- Rendered dynamically by StudentPortal.generateGradeCardPDF() -->
+      </div>
+      <div class="modal-footer no-print">
+        <button class="btn btn-secondary" onclick="document.getElementById('grade-card-modal').classList.remove('active')">
+          Close Preview
+        </button>
+        <button class="btn btn-primary" onclick="window.print()">
+          🖨️ Print / Save as PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL-TIME TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JAVASCRIPT SYSTEM PIPELINE (Cache-busted v=4.4) -->
+  <script src="js/data.js?v=4.4"></script>
+  <script src="js/realtime.js?v=4.4"></script>
+  <script src="js/auth.js?v=4.4"></script>
+  <script src="js/student-portal.js?v=4.4"></script>
+  <script src="js/faculty-portal.js?v=4.4"></script>
+  <script src="js/admin-portal.js?v=4.4"></script>
+  <script src="js/app.js?v=4.4"></script>
+</body>
+</html>

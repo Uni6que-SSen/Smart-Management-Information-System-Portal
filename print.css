@@ -1,0 +1,301 @@
+/* ==========================================================================
+   PARUL UNIVERSITY ERP - OFFICIAL REPORT CARD & PRINT STYLING
+   ========================================================================== */
+
+/* Report card modal preview wrapper */
+.grade-card-container {
+  background: #FFFFFF;
+  color: #111827;
+  padding: 36px 40px;
+  border-radius: var(--radius-md);
+  border: 2px solid #E5E7EB;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-width: 820px;
+  margin: 0 auto;
+  font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* Watermark background */
+.grade-card-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 420px;
+  height: 420px;
+  background: url('../assets/parul_logo.jpg') center/contain no-repeat;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.report-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 2.5px solid #800020;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.report-crest {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 2px solid #D97706;
+  background: #FFFFFF;
+  padding: 2px;
+}
+
+.report-header-titles {
+  flex: 1;
+  text-align: center;
+}
+
+.report-header-titles h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #800020;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+
+.report-header-titles p {
+  font-size: 11px;
+  color: #4B5563;
+  margin-bottom: 2px;
+}
+
+.report-header-titles .accreditation-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #D97706;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.report-barcode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.barcode-stripes {
+  font-family: 'Libre Barcode 39', monospace, 'Courier New';
+  font-size: 32px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.barcode-text {
+  font-family: monospace;
+  font-size: 9px;
+  color: #6B7280;
+}
+
+/* Document Title */
+.report-doc-title {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.report-doc-title h3 {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #1F2937;
+  text-transform: uppercase;
+  background: #F3F4F6;
+  padding: 6px 14px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Student Bio Grid */
+.report-student-meta {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 24px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-size: 12.5px;
+  margin-bottom: 18px;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+}
+
+.meta-label {
+  font-weight: 700;
+  color: #4B5563;
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.meta-value {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Grades Table */
+.report-table {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.report-table th {
+  background: #800020;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 8px 10px;
+  border: 1px solid #800020;
+  text-align: center;
+}
+
+.report-table th.text-left {
+  text-align: left;
+}
+
+.report-table td {
+  padding: 7px 10px;
+  font-size: 11.5px;
+  border: 1px solid #D1D5DB;
+  color: #1F2937;
+  text-align: center;
+}
+
+.report-table td.text-left {
+  text-align: left;
+}
+
+.report-table tr:nth-child(even) td {
+  background: #F9FAFB;
+}
+
+/* Results Summary */
+.report-summary-box {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  border: 2px solid #800020;
+  background: #FFFBEB;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.summary-col h5 {
+  font-size: 10px;
+  color: #78350F;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  font-weight: 700;
+}
+
+.summary-col p {
+  font-size: 16px;
+  font-weight: 800;
+  color: #800020;
+  font-family: 'Plus Jakarta Sans', monospace;
+}
+
+/* Signatures & Seal Footer */
+.report-signatures {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 30px;
+  padding-top: 14px;
+}
+
+.sign-box {
+  text-align: center;
+  font-size: 11px;
+}
+
+.digital-signature-img {
+  font-family: 'Brush Script MT', cursive, serif;
+  font-size: 22px;
+  color: #1E3A8A;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.sign-line {
+  width: 140px;
+  height: 1px;
+  background: #4B5563;
+  margin: 4px auto;
+}
+
+.sign-title {
+  font-weight: 700;
+  color: #374151;
+}
+
+.report-official-seal {
+  width: 80px;
+  height: 80px;
+  border: 2px dashed #800020;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #800020;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.1;
+  padding: 4px;
+}
+
+/* Printable Page Media Rules */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .grade-card-container, .grade-card-container * {
+    visibility: visible;
+  }
+  .grade-card-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    border: none;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

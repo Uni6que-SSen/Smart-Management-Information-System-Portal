@@ -1,0 +1,680 @@
+================================================================================
+           PARUL UNIVERSITY SMART MANAGEMENT INFORMATION SYSTEM (SMIS) PORTAL
+              COMPREHENSIVE TECHNICAL & OPERATIONAL DOCUMENTATION
+================================================================================
+Document Title:      Parul University SMIS Portal - Full Project Manual
+Document Reference:  PU/SMIS/DOC/2026/01
+Author / Dev Team:   Engineering & Academic Systems Development Group
+Accreditation:       NAAC Grade A++ & ISO/IEC 27001 Security Standard
+Target Audience:     Students, Faculty Members, Academic Administrators, Evaluators
+File Location:       PROJECT_DOCUMENTATION.txt (Notepad-Ready Plaintext Format)
+Last Updated:        March 2026
+================================================================================
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+ 1. SYSTEM OVERVIEW & ARCHITECTURAL HIGHLIGHTS
+ 2. TECHNOLOGY STACK & DESIGN SYSTEM
+ 3. COMPLETE REPOSITORY DIRECTORY & FILE INVENTORY
+ 4. CENTRAL AUTHENTICATION & 1-HOUR IDLE TIMEOUT SECURITY
+ 5. DYNAMIC REAL-TIME DATA BUS & DUAL-CHANNEL CDC SYNC
+ 6. DETAILED PORTAL SPECIFICATIONS
+    6.1. Student Portal (/student/*)
+    6.2. Faculty Portal (/faculty/*)
+    6.3. Admin Portal (/admin/*)
+ 7. AUTOMATED ATTENDANCE & OFFICIAL GRADE CARD PIPELINE
+ 8. MASTER DEMONSTRATION PERSONAS & LOGIN CREDENTIALS
+ 9. INSTALLATION, EXECUTION & DEPLOYMENT GUIDE
+10. STEP-BY-STEP VERIFICATION & INTERACTIVE TEST PROCEDURES
+11. SYSTEM AUDIT, TROUBLESHOOTING & FAQS
+================================================================================
+
+
+================================================================================
+1. SYSTEM OVERVIEW & ARCHITECTURAL HIGHLIGHTS
+================================================================================
+The Parul University Smart Management Information System (SMIS) Portal is a comprehensive, institutional-grade academic
+enterprise platform engineered to streamline the entire university lifecycle across
+three key stakeholder groups: Students, Faculty Instructors, and Academic
+Administrators.
+
+The platform eliminates the legacy friction of fragmented academic portals by
+unifying daily operations into a responsive, single-page application (SPA) backed
+by an event-driven Node.js gateway.
+
+CORE ARCHITECTURAL PILLARS:
+1. Strict Role Segregation (Zero-Overlap Security):
+   Independent namespaces for each role (/student, /faculty, /admin). A student
+   session is cryptographically and logically restricted from invoking faculty or
+   administrative operations.
+2. Deterministic 1-Hour Inactivity Auto Sign-Out:
+   Complies with campus terminal safety standards. An inactivity engine tracks user
+   input and automatically logs out idle sessions after 60 minutes (3,600,000 ms),
+   with a 5-minute visual countdown warning modal.
+3. Sub-100ms Dual-Channel Real-Time Data Sync:
+   Implements a hybrid bus combining WebSockets (Node.js 'ws' engine) and the
+   browser BroadcastChannel API ('PU_ERP_REALTIME_BUS'). Faculty attendance submissions
+   or outpass approvals propagate instantly to student dashboards without page reloads.
+4. High-Definition Printable Grade Cards:
+   Full client-side PDF export pipeline rendering official transcripts complete
+   with University Crest, Security Barcode, Verification QR Code, and digital
+   signatures from the Controller of Examinations.
+
+
+================================================================================
+2. TECHNOLOGY STACK & DESIGN SYSTEM
+================================================================================
+BACKEND ARCHITECTURE:
+- Runtime Environment:    Node.js (v18+)
+- Web Framework:          Express.js 5.x (HTTP REST API + Static Asset Pipeline)
+- Real-Time Messaging:    WebSocket Server ('ws' library v8.21.3)
+- In-Memory Data Store:   Stateful JSON Collections (Students, Faculty, Admins, Audit)
+- Protocol Gateway:       Dual HTTP (Port 3000) & WebSocket (ws://localhost:3000)
+
+FRONTEND ARCHITECTURE:
+- Markup:                 HTML5 (Semantic, Accessible, Single Page Application)
+- Styling:                Vanilla CSS3 with CSS Custom Properties (Design Tokens)
+- Typography:             Google Fonts (Outfit, Plus Jakarta Sans, JetBrains Mono)
+- Client Logic:           Modular Vanilla JavaScript (ES6+ IIFE Architecture)
+- Audio Engine:           HTML5 Web Audio API (Synthesized chimes for live alerts)
+- Real-Time Bus:          WebSocket + BroadcastChannel + LocalStorage Event Fallback
+
+DESIGN PALETTE & INSTITUTIONAL THEME:
+- PU Primary Maroon:      #800020 (Institutional Crest Color)
+- PU Dark Maroon:         #580016 (Hero Headers & Heavy Accents)
+- PU Gold / Amber:        #D97706 / #FCD34D (Honors, Accreditation Badges)
+- Slate Dark Mode Base:   #0F172A / #1E293B (Executive Dashboard theme)
+- Success Emerald:        #10B981 (Compliant Attendance >= 75%, Approved Outpasses)
+- Warning Orange:         #F59E0B (Low Attendance Warning 70%-74%)
+- Critical Red:           #EF4444 (Inactivity Alerts, Attendance < 70%)
+
+
+================================================================================
+3. COMPLETE REPOSITORY DIRECTORY & FILE INVENTORY
+================================================================================
+The project is cleanly structured into the following directory tree:
+
+Mini Project/
+|
+|-- LOGIN_CREDENTIALS.txt     <- Quick reference listing all pre-seeded logins
+|-- PROJECT_DOCUMENTATION.txt <- Full technical & operational manual (this file)
+|-- package.json              <- Project metadata, scripts, and dependencies
+|-- package-lock.json         <- Dependency lockfile
+|-- server.js                 <- Node.js Express & WebSocket backend server
+|
+`-- public/                   <- Web Application Root Directory
+    |
+    |-- index.html            <- SPA HTML shell, topbar, modals & containers
+    |
+    |-- assets/               <- High-resolution university branding assets
+    |   |-- parul_logo.jpg          <- University logo (Gold emblem)
+    |   |-- parul_crest.jpg         <- Academic seal for marksheets
+    |   |-- parul_campus.jpg        <- High-tech campus photography
+    |   |-- parul_footer_banner.png <- Official institutional footer banner
+    |   |-- faculty_pritam.jpg      <- Faculty profile picture (Guide photo)
+    |   `-- student_sonakshi.jpg    <- Student profile picture
+    |
+    |-- css/                  <- Modular Design System
+    |   |-- variables.css     <- CSS variables, color palettes, fonts, shadows
+    |   |-- main.css          <- Base layout, typography, buttons, tables, cards
+    |   |-- auth.css          <- Split-screen hero, login/register card styles
+    |   |-- portals.css       <- Portal layouts, KPI cards, subtabs, grids
+    |   `-- print.css         <- CSS print media styles for Grade Cards
+    |
+    `-- js/                   <- Modular Client JavaScript Architecture
+        |-- data.js           <- Master in-memory database & initial state seeds
+        |-- realtime.js       <- RealtimeEngine (WebSockets + BroadcastChannel)
+        |-- auth.js           <- AuthEngine (RBAC, Session & 1-Hr Inactivity Timer)
+        |-- app.js            <- Master Application Controller & Portal Router
+        |-- student-portal.js <- Student Portal UI & 12 embedded widgets
+        |-- faculty-portal.js <- Faculty Portal UI, Capstone Desk & Attendance Entry
+        `-- admin-portal.js   <- Admin Console, Master DB, Result Publisher & CDC
+
+
+================================================================================
+4. CENTRAL AUTHENTICATION & 1-HOUR IDLE TIMEOUT SECURITY
+================================================================================
+4.1 STRICT ROLE-BASED ACCESS CONTROL (RBAC):
+The login page provides dedicated tabs for Student, Faculty, and Admin personas:
+- Students authenticate via 12-digit Enrollment No (e.g. 210303105001) or Email.
+- Faculty authenticate via Employee ID (e.g. PU-FAC-3012, PU-FAC-8821) or Email.
+- Admins authenticate via Admin ID (e.g. PU-ADM-001) or Registrar Email.
+Public registration enforces verification against pre-authorized Master Rosters.
+Admin accounts cannot be self-registered; they are restricted to registrar issuance.
+
+4.2 DETERMINISTIC 1-HOUR INACTIVITY AUTO SIGN-OUT:
+To prevent unauthorized access on shared campus laboratory terminals:
+- Time Duration: 60 minutes = 3,600,000 milliseconds.
+- Passive Interaction Monitoring: Attaches throttled event listeners to:
+  'mousemove', 'keydown', 'click', 'scroll', 'touchstart'.
+- Continuous Reset: Any user activity updates 'lastActivityTime = Date.now()'.
+- Real-Time Topbar Widget: Displays a live ticking countdown pill:
+  "Session: 01:00:00" -> "Session: 00:54:12", etc.
+- 5-Minute Critical Warning Modal: When remaining time drops to <= 5 minutes
+  (300,000 ms), a high-visibility security alert modal pops up with a large
+  countdown timer and a "Keep Me Signed In" action.
+- Auto Sign-Out & Redirection: When the timer hits 00:00, the session token is
+  wiped, local storage is cleared, and the browser redirects to:
+  "/?session_expired=true", triggering a prominent notification banner.
+- Reviewer Fast-Forward Button: The topbar includes a "⚡ Test 1-Hour Timeout"
+  button to immediately simulate timeout expiration for evaluation purposes.
+
+
+================================================================================
+5. DYNAMIC REAL-TIME DATA BUS & DUAL-CHANNEL CDC SYNC
+================================================================================
+The SMIS Portal employs a dual-channel real-time pub/sub synchronization pipeline:
+
+PRIMARY CHANNEL: Native WebSocket Hub
+- Runs on ws://localhost:3000 alongside Express.
+- Broadcasts JSON-encoded academic events to all connected clients across devices.
+
+SECONDARY CHANNEL: HTML5 BroadcastChannel API
+- Operates on channel name 'PU_ERP_REALTIME_BUS'.
+- Guarantees instantaneous, zero-latency cross-tab communication on the same browser
+  even in offline or low-connectivity environments.
+
+AUDIO SYNTHESIS: Web Audio API
+- When academic updates occur (e.g. attendance marked, outpass approved, results
+  published), the client uses an oscillator to generate a pleasant, two-tone
+  educational chime (523.25 Hz [C5] -> 659.25 Hz [E5]) without external audio files.
+
+CORE EVENT SPECIFICATIONS:
++--------------------------+-----------------+-------------------+-----------------------------------------+
+| Event Key                | Originator Role | Target Role       | Impact / UI Action                      |
++--------------------------+-----------------+-------------------+-----------------------------------------+
+| ATTENDANCE_UPDATED       | FACULTY         | STUDENT, ADMIN    | Recalculates subject %, chimes, logs CDC|
+| OUTPASS_STATUS_CHANGED   | FACULTY         | STUDENT, ADMIN    | Updates status, renders QR Gatepass     |
+| EXAM_RESULTS_PUBLISHED   | ADMIN           | STUDENT, FACULTY  | Unlocks Grade Card PDF download         |
+| AUDIT_LOG_ADDED          | SYSTEM          | ADMIN             | Prepends row to live CDC Audit Stream   |
++--------------------------+-----------------+-------------------+-----------------------------------------+
+
+
+================================================================================
+6. DETAILED PORTAL SPECIFICATIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+6.1. PORTAL 1: STUDENT PORTAL (/student/*)
+--------------------------------------------------------------------------------
+The Student Portal is tailored for Aarav Mehta (Enrollment: 210303105001) and his
+peers. It features 8 comprehensive navigation sections and embedded modules:
+
+1. Self Dashboard:
+   - Profile Banner: Student name, branch, semester, division, batch, roll number.
+   - Top KPI Grid: Overall Attendance % (88.5%), SGPA (9.45), CGPA (9.20),
+     Active Mess Pass status, Bus Route 14 information.
+   - Quick Bio-Data & Documents Access Widget with direct profile management links.
+   - Today's Hourly Timetable: Displays active lecture slots with room numbers.
+   - 30-Day Attendance Barometer: Quick compliance glance.
+   - Live Campus Announcements Ticker.
+   - Quick Action Shortcuts (Apply Gatepass, Pay Fees, Download Marksheet).
+
+2. Student Profile, Bio-Data & Supporting Documents:
+   - Personal Details: Full name, date of birth, gender, blood group, and residential home address.
+   - Contact Information: Student phone number, parent phone number, and institutional/parent emails.
+   - Guardianship Data: Parent/guardian names and complete emergency contact details.
+   - Institutional Enrollment Data: Unique student ID number, admission year, class, and section.
+   - Supporting Documents: Digital copies of previous transcripts, birth certificates, and transfer certificates (TC) uploaded by student or admin, with preview and download.
+   - Portal Features & Management:
+     * Credentials: Unique username and password assigned for role-based login access.
+     * Profile Updates: Edits to profile fields managed by Superadmin via System Settings to control which details students or parents can alter (Contact & address editable; core academic data locked).
+     * Tracking Modules: Linked interactive modules for real-time Attendance Management, Fee Payment History, and Examination Results.
+
+3. Attendance Tracker:
+   - Subject-wise breakdown for all enrolled courses:
+     * CS601: Advanced Operating Systems (38/42 Lectures - 90.5%) [Eligible]
+     * CS602: Cloud Computing Architecture (34/40 Lectures - 85.0%) [Eligible]
+     * CS603: Machine Learning & Pattern Recog. (40/44 Lectures - 90.9%) [Eligible]
+     * CS604: Full Stack Web Engineering (31/36 Lectures - 86.1%) [Eligible]
+     * CS605: Distributed Database Systems (33/38 Lectures - 86.8%) [Eligible]
+     * CS606: Artificial Intelligence Lab (25/28 Sessions - 89.3%) [Eligible]
+   - Visual progress bars color-coded according to university regulations:
+     Green for >= 75%, Amber for 70%-74%, Red for < 70%.
+
+4. Time Table & 365-Day Academic Calendar:
+   - Full weekly schedule grid (Monday to Friday, 09:00 AM to 05:00 PM).
+   - University academic calendar with holiday markers, mid-semester exams,
+     end-semester submission dates, and tech-fest milestones.
+
+5. Results & Examination Schedule:
+   - Complete semester marks breakdown: Internal CIE (40), Mid-Sem (20), End-Sem (40).
+   - SGPA & CGPA calculation per UGC 10-point scale.
+   - "Download Official Grade Transcript" button which generates the official
+     printable Grade Card PDF with institutional seal and verification QR code.
+   - Upcoming Final Examination Schedule with hall tickets and seat allotments.
+
+6. Fee Ledger & Receipts:
+   - Fee summary: Tuition fee, hostel fee, examination fee, bus transport fee.
+   - Total paid vs. outstanding dues statement.
+   - Downloadable official digital fee receipts with transaction hashes.
+   - Interactive payment simulator for clearing outstanding dues.
+
+7. Gate Pass & Mess Pass:
+   - Hostel Leave / Outpass Application Form (Date, reason, destination, parent phone).
+   - Real-time approval tracker: Pending -> Approved / Rejected.
+   - Verifiable Digital Gatepass QR Code rendered immediately upon faculty approval.
+   - Digital Mess Pass badge for Central Dining Hall meal clearance.
+
+8. Feedback & Student Grievance Helpdesk:
+   - Course Evaluation Survey for rating faculty instructional delivery.
+   - Formal Grievance Ticketing Desk (Hostel, Academics, Infrastructure, Accounts)
+     with ticket tracking IDs.
+
+
+--------------------------------------------------------------------------------
+6.2. PORTAL 2: FACULTY PORTAL (/faculty/*)
+--------------------------------------------------------------------------------
+The Faculty Portal is tailored for instructors such as Mr. Pritam Samanta
+(PU-FAC-3012) and Dr. Rajesh Sharma (PU-FAC-8821). Features include:
+
+1. Faculty Dashboard:
+   - Institutional Profile: Name, Employee ID, designation, department, assigned courses.
+   - Top KPI Grid: Weekly Teaching Workload (18 Hrs/Wk), Today's Scheduled Lectures,
+     Total Supervised Capstone Projects (5 Projects), Pending Student Outpasses.
+   - Biometric Attendance Punch Log (In-time, Out-time, Campus biometric status).
+   - Leave Balance Wallet (Casual Leave: 4, Sick Leave: 8, Duty Leave: 4, Earned Leave: 12).
+   - Monthly Salary Slip Breakdown (Basic, DA, HRA, Deductions, Net Salary: Rs 99,888).
+   - Faculty Bus Transport Route Pass.
+   - Departmental Circulars & Academic Committee Notices.
+   - Quick Student Directory & Performance Lookup tool.
+
+2. Faculty Profile, Credentials & Performance Portfolio (/faculty/profile):
+   - Required Access Credentials:
+     * Institute URL: https://paruluniversity.ac.in and SMIS Portal Address.
+     * Institute Identification Code (ID): PU-FET-VADODARA-104 (Faculty of Engineering & Technology).
+     * Unique Faculty Staff Login ID: PU-FAC-8821.
+     * Initial Auto-Generated Password: Secure masked display with interactive Show/Hide toggle
+       and 1-click clipboard copy (auto-generated by HOD CSE & System Administrator for initial login).
+     * Security & RBAC: Two-Factor Authentication, verified 256-bit JWT bearer token, and last login biometric record.
+   - Personal & Basic Information:
+     * Full Name: Dr. Rajesh Sharma.
+     * Parents' Names: Father (Prof. Omprakash Sharma) & Mother (Mrs. Shanti Sharma).
+     * Date of Joining: 15 July 2017 (Service tenure: 9+ years at Parul University).
+     * Personal Details: Marital status (Married), DOB (18 April 1982), Gender (Male), Blood Group (B+), Nationality (Indian).
+     * Contact Information: Mobile & WhatsApp (+91 98251 88210), Official University Email, Personal Alternate Email,
+       Department Intercom Extension (Ext. 4088), Emergency Contact (Spouse).
+     * Address Registry: Residential Campus Quarters (Faculty Enclave) & Permanent Home Address (Vadodara).
+     * Profile Photograph Upload: Interactive photo upload modal supporting local device files (with instant Base64
+       data preview and local storage persistence), URL input, and professional presets.
+     * Edit Details Modal: Permitted contact and address updates with audit trail logging.
+   - Academic & Professional Credentials:
+     * Educational Background: Ph.D. in CSE (IIT Bombay 2016), M.Tech in CE (VJTI Mumbai 2011 - Gold Medalist),
+       B.E. in CSE (MSU Baroda 2008 - Distinction).
+     * Post-Doctoral & Industry Certifications: AWS Certified Solutions Architect, NVIDIA DLI Ambassador,
+       Google Cloud Certified Professional Architect, UGC-NET JRF.
+     * Teaching Experience & Employment History: 18.2 Total Years (14.5 Years University Teaching, 3.7 Years Industry R&D)
+       across Parul University, SVNIT Surat, and Tata Consultancy Services (TCS Innovation Labs).
+     * Assigned Courses & Workloads: 18 Contact Hours / Week (100% compliant with AICTE & UGC Associate Professor norms),
+       including CS601 (Advanced Web Tech), CS605 (Cloud Architecture), CS606 (Distributed Systems), and PRJ601 (Capstone).
+     * Weekly Teaching Schedule Timetable: Day-by-day classroom and laboratory slot routine (Mon–Fri).
+   - Research & Performance Metrics:
+     * Research Summary KPI Strip: 34 Publications, 24 Scopus Indexed, 8 SCI/SCIE Indexed, 942 Citations,
+       h-index: 16, i10-index: 22, Scopus Author ID (57201948821), ORCID (0000-0002-8419-7721).
+     * Research Publications: 28 Refereed Journal Papers with DOI links, impact factors, and citations.
+     * Textbooks & Chapters: 2 Authored Textbooks (McGraw-Hill & CRC Press) and 4 Book Chapters (Springer Nature, Elsevier, Wiley-IEEE, De Gruyter).
+     * Conference Proceedings & Patents: 14 IEEE/ACM conference proceedings; 3 Official Patents registered with Indian Patent Office
+       (AI-Driven Resource Throttler, Biometric RFID Edge Gateway, Decentralized Academic Governance Ledger).
+     * Honours & Awards: Best Faculty Researcher Award 2024-25, CSI Distinguished Educator Award, IEEE Branch Counselor Award, UGC Fellowship.
+     * Professional Memberships: Senior Member IEEE (SMIEEE), Life Member ISTE (LMISTE), Fellow IEI (FIE), Member ACM.
+     * Consultancy & Funded Projects: GUJCOST & DST Gujarat Project (Rs 18.50 Lakhs) and L&T Technology Services Industrial Consultancy (Rs 8.20 Lakhs)
+       totaling Rs 26.70 Lakhs in funded grants.
+
+3. Capstone & Project Guide Desk:
+   - Directly maps to the department project allocation roster:
+     * Project 1: Hostel Entry & Facial Recognition Attendance System (Guide: Mr. Pritam Samanta)
+     * Project 2: Cloud-Based Academic SMIS & Student Management Portal (Guide: Mr. Pritam Samanta)
+     * Project 3: Automated Crop Yield & Pest Prediction Model (Guide: Mr. Pritam Samanta)
+     * Project 4: Campus Indoor Navigation & AR Wayfinding System (Guide: Mr. Pritam Samanta)
+     * Project 5: Smart University Online Fee & Payment Reconciliation (Guide: Prof. Jatin Morwal)
+     * Project 6: Emergency Ambulance Alert & Campus Dispatch System (Guide: Prof. Jatin Morwal)
+   - Detailed team breakdown: Team members, roll numbers, project abstract, tech stack,
+     weekly review status, and direct guide remarks submission.
+
+3. Hourly Attendance Entry Console:
+   - Course code selector (CS601, CS602, CS603, CS604, CS605, CS606).
+   - Division filter (Division 6A, Division 6B, or Combined).
+   - Hourly lecture slot selection (e.g. 10:00 AM - 11:00 AM).
+   - Instant "Mark All Present" & "Mark All Absent" batch action toggles.
+   - Interactive Present / Absent / Late toggle pills for each individual student.
+   - Live slot attendance percentage calculation.
+   - 1-Click "Save & Broadcast to Students" button that triggers WebSocket CDC events.
+
+4. Timetable & Classroom Management:
+   - Complete weekly teaching timetable grid across all assigned subjects and labs.
+   - Room numbers, lab assignments, and active slot highlight.
+
+5. Marks & Evaluation Panel:
+   - Grade sheet for Continuous Internal Evaluation (CIE - 40 Marks).
+   - Mid-Sem Examination scoring console (20 Marks).
+   - Lab Practical & Term-Work evaluation inputs.
+
+6. Outpass / Leave Approval Desk:
+   - Live incoming queue of pending student hostel leave / outpass requests.
+   - Details: Student name, enrollment number, room number, destination, leave dates, reason.
+   - 1-Click "Approve Outpass" and "Reject" buttons.
+   - Approving triggers an immediate broadcast event to unlock the student's QR Gatepass.
+
+
+--------------------------------------------------------------------------------
+6.3. PORTAL 3: ADMIN PORTAL (/admin/*)
+--------------------------------------------------------------------------------
+The Admin Portal is tailored for the Office of the Registrar and Chief Academic
+Administrator, Dr. Ketan Kotecha (PU-ADM-001):
+
+1. Executive Analytics & Overview:
+   - University-wide statistics: 14,250 Enrolled Students, 820 Faculty & Instructors,
+     84.2% Institutional Average Attendance, 99.98% System Uptime.
+   - SMART Enterprise Subscription Hub quick overview card and direct link.
+   - Departmental Academic Performance Matrix (Computer Science, IT, AI, Mechanical, Civil).
+   - Real-time active network node health indicators.
+
+2. SMART Account Setup & Enterprise Subscriptions Hub:
+   - Required Information and Steps (Standardized Onboarding Pipeline):
+     * Valid Email Address: Primary organizational email tied to the university's
+       software purchase contract (admin@paruluniversity.ac.in), verified domain
+       licensee status, and invitation link dispatch for onboarding co-administrators.
+     * SMART Account Setup: Full registration profile for Dr. Ketan Kotecha,
+       secure password protection with interactive show/hide toggle (Admin@SMART#2026)
+       and cryptographic FIDO2/SHA-256 key hashing, with explicit selection of
+       "Adult" as the user type (mandatory institutional authority preventing student/minor
+       permission constraints).
+     * Purchase Confirmation or Product Key: Comprehensive documentation and official
+       email receipt verification confirming software subscriptions (SMART Learning Suite
+       Enterprise Edition v24 under PO #PO-PARUL-SMART-2025-88124, Invoice #INV-SMART-ED-99201,
+       Product Key SMART-SLS-2026-PU-9821-X4K9) to claim and activate multi-seat licenses.
+   - Admin Profile Capabilities:
+     * Subscription Management:
+       - Activate and view active enterprise suites: SMART Learning Suite (850 Seats, 108 Available),
+         SMART Notebook Classroom Suite (300 Seats, 35 Available), and SMART Lumio Cloud Platform
+         (15,000 Seats, 750 Available).
+       - Live seat utilization progress meters with real-time available seat counts.
+       - Renewal dates monitoring and days remaining countdown badges.
+       - Interactive "Claim Product Key", "Extend Seats", and "View Purchase Receipt & Documentation" modals.
+     * User Provisioning:
+       - Add, update, or remove educator and user university email addresses (@paruluniversity.ac.in)
+         to grant or revoke software access.
+       - Dynamic quota synchronization: Granting access decrements available seats; revoking access
+         instantly restores available seats back to the institution pool.
+       - Multi-criteria search and filter by department or software suite.
+     * Role Assignment:
+       - Manage other administrators, tech instructors, or supervisors within Parul University:
+         Master Super-Admin (Dr. Ketan Kotecha), Organization Administrator (Mrs. Meena Shah),
+         Tech Instructors (Dr. Rajesh Sharma, Dr. Vikramaditya Joshi), and Departmental
+         Supervisors (Dr. Alok Verma, Prof. Priya Mehta).
+       - In-line dropdown re-assignment with instantaneous role updates, scope delegation,
+         and real-time CDC system audit trail logging.
+       - Add new staff role assignment modal with custom operational scope definitions.
+
+3. User Management & Master DB:
+   - Registrar's Master Student Enrollment Registry.
+   - Registration Verification Queue: Instant 1-click authorization of newly registered
+     students and faculty members.
+   - Student roster search, profile inspection, and enrollment deletion.
+
+4. Master Academic Setup:
+   - University academic structure configuration.
+   - Department, curriculum, credit allocation, and lecture hour frameworks.
+   - Faculty course allocations.
+
+5. Examination & Result Publishing Engine:
+   - Master Semester Examination Result Publisher.
+   - 1-Click "Calculate & Publish Semester Results" action:
+     * Dynamically compiles CIE + Mid-Sem + End-Sem scores.
+     * Computes SGPA and CGPA per UGC 10-point scale.
+     * Publishes results to all student portals via WebSocket event.
+     * Unlocks the official printable Grade Cards across the entire university.
+
+6. System Audit Logs (Real-Time CDC Stream):
+   - Immutable live audit ledger capturing every critical transaction:
+     * Timestamp (ISO 8601)
+     * Actor Name & Role (Student, Faculty, Admin, System Gateway)
+     * Action Executed (LOGIN, USER_PROVISIONED, PRODUCT_KEY_CLAIMED, ROLE_ASSIGNMENT_UPDATED, RESULT_PUBLISHED)
+     * Target Resource
+     * Client IP Address (e.g. 127.0.0.1)
+     * Execution Status (SUCCESS, PENDING, REJECTED)
+   - Real-time row prepending with smooth CSS highlight animation.
+   - Full CSV export capability for compliance reporting.
+
+
+================================================================================
+7. AUTOMATED ATTENDANCE & OFFICIAL GRADE CARD PIPELINE
+================================================================================
+7.1 ATTENDANCE AGGREGATION ALGORITHM:
+Attendance compliance is calculated dynamically using relational aggregation:
+   Percentage = (Attended Lectures / Total Lectures Held) * 100
+- If Percentage >= 75%: Student is granted "Exam Eligible" clearance.
+- If 70% <= Percentage < 75%: Student receives a "Shortage Warning" notice.
+- If Percentage < 70%: Student is flagged as "Detention Risk" requiring proctor review.
+
+7.2 OFFICIAL GRADE CARD PDF GENERATION WORKFLOW:
+1. Faculty records Continuous Internal Evaluation (CIE) and Mid-Sem marks.
+2. Controller of Examinations enters End-Semester examination marks.
+3. Administrator executes the Result Publishing Engine.
+4. System computes SGPA per the official UGC formula:
+   SGPA = Sum(Course_Credits * Grade_Points) / Sum(Course_Credits)
+5. The student accesses the "Results" tab and clicks "Download Official Grade Transcript".
+6. The client renders an official Parul University Statement of Grades modal featuring:
+   - High-resolution University Crest & Gold Seal
+   - Student Bio-Data, Enrollment Number & Examination Seat Number
+   - Course-wise Credit & Letter Grade Distribution
+   - Calculated Semester SGPA & Cumulative CGPA
+   - Security Barcode and Verification QR Code
+   - Digital signature of the Controller of Examinations
+7. The user clicks "Print / Save as PDF", triggering the browser's native print engine
+   optimized with clean print media queries ('css/print.css').
+
+
+================================================================================
+8. MASTER DEMONSTRATION PERSONAS & LOGIN CREDENTIALS
+================================================================================
+The application is pre-seeded with verified demonstration credentials. All accounts
+use the standard default password 'password123' (or 'Student@123' / 'Faculty@123' / 'Admin@123').
+
+--------------------------------------------------------------------------------
+STUDENT ACCOUNTS (Select "Student" tab on Login Page)
+--------------------------------------------------------------------------------
+1. Aarav Mehta (Featured Student - Division A)
+   - Enrollment No: 210303105001
+   - Email:         aarav.mehta@paruluniversity.ac.in
+   - Password:      password123 (or Student@123)
+   - Program:       B.Tech Computer Science & Engineering (Semester 6, Div 6A)
+   - Roll No:       CSE-21-001 | Batch: 1
+
+2. Diya Sharma (Division A)
+   - Enrollment No: 210303105002
+   - Email:         diya.sharma@paruluniversity.ac.in
+   - Password:      password123
+
+3. Rohan Patel (Division A)
+   - Enrollment No: 210303105003
+   - Email:         rohan.patel@paruluniversity.ac.in
+   - Password:      password123
+
+4. Ananya Iyer (Division B)
+   - Enrollment No: 210303105004
+   - Email:         ananya.iyer@paruluniversity.ac.in
+   - Password:      password123
+
+5. Kabir Verma (Division B)
+   - Enrollment No: 210303105005
+   - Email:         kabir.verma@paruluniversity.ac.in
+   - Password:      password123
+
+6. Pooja Desai (Division B)
+   - Enrollment No: 210303105099
+   - Email:         pooja.desai@paruluniversity.ac.in
+   - Password:      password123
+
+--------------------------------------------------------------------------------
+FACULTY ACCOUNTS (Select "Faculty" tab on Login Page)
+--------------------------------------------------------------------------------
+1. Mr. Pritam Samanta (Featured Faculty & Capstone Project Guide)
+   - Employee ID:   PU-FAC-3012
+   - Email:         pritam.samanta@paruluniversity.ac.in
+   - Password:      password123 (or Faculty@123)
+   - Designation:   Assistant Professor & Project Guide
+   - Department:    Computer Science & Engineering
+   - Courses:       CS601 (Operating Systems), CS604 (Web Engineering)
+   - Guided Projs:  Hostel Entry, SMIS Portal, Crop Yield, Campus Navigation
+
+2. Prof. Jatin Morwal (Faculty & Project Guide)
+   - Employee ID:   PU-FAC-2045
+   - Email:         jatin.morwal@paruluniversity.ac.in
+   - Password:      password123 (or Faculty@123)
+   - Designation:   Assistant Professor & Project Guide
+   - Department:    Computer Science & Engineering
+   - Courses:       CS602 (Cloud Computing), CS603 (Machine Learning)
+   - Guided Projs:  Fee Portal, Emergency Ambulance Alert System
+
+3. Dr. Rajesh Sharma (Senior Proctor & Professor)
+   - Employee ID:   PU-FAC-8821
+   - Email:         rajesh.sharma@paruluniversity.ac.in
+   - Password:      password123 (or Faculty@123)
+   - Designation:   Associate Professor & Senior Proctor
+   - Department:    Computer Science & Engineering
+   - Courses:       CS601 (Operating Systems), CS605 (Database Systems)
+
+4. Prof. Ananya Patel (Faculty)
+   - Employee ID:   PU-FAC-4019
+   - Email:         ananya.patel@paruluniversity.ac.in
+   - Password:      password123
+   - Courses:       CS602 (Cloud Computing)
+
+5. Dr. Vikramaditya Joshi (Professor)
+   - Employee ID:   PU-FAC-7102
+   - Email:         vikram.joshi@paruluniversity.ac.in
+   - Password:      password123
+   - Courses:       CS603 (Machine Learning), CS606 (AI Lab)
+
+--------------------------------------------------------------------------------
+ADMINISTRATOR ACCOUNT (Select "Admin" tab on Login Page)
+--------------------------------------------------------------------------------
+1. Dr. Ketan Kotecha (Registrar & Chief Academic Administrator)
+   - Admin ID:      PU-ADM-001
+   - Email:         admin@paruluniversity.ac.in
+   - Password:      password123 (or Admin@123)
+   - Designation:   Chief Academic Administrator & Registrar
+   - Department:    Office of the Provost / Academic Council
+   - Access Scope:  Master Super-Admin (Full Institutional Governance)
+
+
+================================================================================
+9. INSTALLATION, EXECUTION & DEPLOYMENT GUIDE
+================================================================================
+9.1 PREREQUISITES:
+- Node.js (Version 18.0.0 or higher recommended)
+- Modern Web Browser (Google Chrome, Microsoft Edge, Mozilla Firefox, Brave, Safari)
+
+9.2 STEP-BY-STEP SETUP:
+1. Open PowerShell or Terminal in the project root directory:
+   cd "c:\Users\01\OneDrive\Desktop\Mini Project"
+
+2. Verify that dependencies ('express' and 'ws') are installed:
+   npm install
+
+3. Launch the Parul University ERP Server:
+   npm start
+   (or alternatively: node server.js)
+
+4. The terminal will output the startup banner:
+   ================================================================
+     PARUL UNIVERSITY ERP SYSTEM - LIVE GATEWAY
+     Server Running at: http://localhost:3000
+     WebSocket Hub at:  ws://localhost:3000
+     Role Portals: /student, /faculty, /admin
+     1-Hour Inactivity Monitor: ACTIVE
+   ================================================================
+
+5. Open your web browser and navigate to:
+   http://localhost:3000
+
+
+================================================================================
+10. STEP-BY-STEP VERIFICATION & INTERACTIVE TEST PROCEDURES
+================================================================================
+
+TEST 1: MULTI-TAB REAL-TIME ATTENDANCE SYNCHRONIZATION
+--------------------------------------------------------------------------------
+Goal: Verify instant sub-100ms real-time data sync from Faculty to Student.
+1. Open Browser Tab 1 -> Navigate to http://localhost:3000
+2. Select "Faculty" tab -> Sign in as Mr. Pritam Samanta (PU-FAC-3012 / password123).
+3. Navigate to "Attendance Entry Console" subtab.
+4. Open Browser Tab 2 (or a split window) -> Navigate to http://localhost:3000
+5. Select "Student" tab -> Sign in as Aarav Mehta (210303105001 / password123).
+6. In Tab 2 (Student), click the "Attendance Tracker" subtab and observe the current %.
+7. In Tab 1 (Faculty), change the attendance status of Aarav Mehta or click
+   "Mark All Present", then click "💾 Save & Broadcast to Students".
+8. In Tab 2 (Student), observe:
+   - A chime sound plays immediately via the Web Audio API.
+   - A real-time toast notification pops up: "Attendance Updated".
+   - Aarav's attendance percentage updates dynamically without refreshing the page!
+
+TEST 2: REAL-TIME HOSTEL OUTPASS APPROVAL WITH QR GATEPASS
+--------------------------------------------------------------------------------
+Goal: Verify instant digital Gatepass generation upon faculty review.
+1. In Tab 2 (Student - Aarav Mehta), click "Gate Pass & Mess Pass" subtab.
+2. Submit a new outpass request:
+   - Purpose: "Weekend Home Visit to Ahmedabad"
+   - Leave Date: Tomorrow
+   - Return Date: Sunday Evening
+3. Click "Submit Outpass Request". The status will show "PENDING APPROVAL".
+4. In Tab 1 (Faculty - Mr. Pritam Samanta), click "Outpass / Leave Approvals" subtab.
+5. Aarav Mehta's pending request will appear in the queue.
+6. Click "✓ Approve Outpass".
+7. Look at Tab 2 (Student):
+   - The status instantly switches to "APPROVED".
+   - An official digital Gatepass appears displaying a security QR code for
+     campus security gate clearance.
+
+TEST 3: DETERMINISTIC 1-HOUR IDLE TIMEOUT & FAST-FORWARD TEST
+--------------------------------------------------------------------------------
+Goal: Verify security compliance and auto sign-out functionality.
+1. In either logged-in portal, observe the topbar countdown widget:
+   "⏱️ Session: 01:00:00" ticking down second-by-second.
+2. Move the mouse or press any key: notice the timer resets smoothly to 01:00:00.
+3. Click the topbar button: "⚡ Test 1-Hour Timeout".
+4. The system immediately executes auto sign-out:
+   - User identity and tokens are wiped.
+   - The browser redirects to "http://localhost:3000/?session_expired=true".
+   - A security alert banner displays:
+     "⚠️ Session Terminated: You were signed out automatically due to 1 hour of
+      inactivity. Please authenticate to resume."
+
+TEST 4: 1-CLICK SEMESTER RESULT PUBLISHING & GRADE CARD PRINTING
+--------------------------------------------------------------------------------
+Goal: Verify administrative exam publishing and official PDF transcript export.
+1. Open http://localhost:3000 -> Sign in as Admin (PU-ADM-001 / password123).
+2. Click "Examination & Result Publishing Engine" subtab.
+3. Click "🎓 Publish Semester Results Instantly".
+4. The system calculates SGPA/CGPA across all student rosters and broadcasts the event.
+5. In another tab as Student (Aarav Mehta), click "Results & Exam Schedule" subtab.
+6. Click "📜 Download Official Grade Transcript".
+7. An official high-definition transcript renders with University Seal and QR Code.
+8. Click "🖨️ Print / Save as PDF" to preview the clean, print-ready document.
+
+
+================================================================================
+11. SYSTEM AUDIT, TROUBLESHOOTING & FAQS
+================================================================================
+Q1: Can I run this offline without an active internet connection?
+A1: Yes! The system is completely self-contained. The fonts fall back gracefully to
+    system sans-serif / monospace, all university images are packaged locally in
+    'public/assets/', and audio alerts use client-side Web Audio API synthesis.
+
+Q2: Does the real-time sync work if WebSockets are blocked by a campus firewall?
+A2: Yes! The architecture features a dual-channel design. If WebSockets are blocked,
+    the HTML5 BroadcastChannel API automatically handles instant synchronization
+    across all browser tabs on the local machine.
+
+Q3: How do I reset all data back to original default demo seeds?
+A3: Simply open your browser Developer Tools (F12) -> Application -> Local Storage ->
+    Clear All, and restart the Node.js server via terminal.
+
+Q4: What browser versions are supported?
+A4: All modern evergreen browsers including Google Chrome 90+, Microsoft Edge 90+,
+    Mozilla Firefox 88+, and Safari 14+.
+
+================================================================================
+                         END OF PROJECT DOCUMENTATION
+================================================================================

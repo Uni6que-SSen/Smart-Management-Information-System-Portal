@@ -1,0 +1,356 @@
+/* ==========================================================================
+   PARUL UNIVERSITY ERP - AUTHENTICATION & LOGIN STYLING
+   ========================================================================== */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--bg-app);
+}
+
+.auth-split-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Left Hero Showcase */
+.auth-hero-pane {
+  flex: 1.1;
+  position: relative;
+  background: url('../assets/parul_campus.jpg') center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  overflow: hidden;
+  color: #FFFFFF;
+}
+
+.auth-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(74, 6, 21, 0.94) 0%, rgba(26, 13, 40, 0.92) 50%, rgba(15, 23, 42, 0.94) 100%);
+  backdrop-filter: blur(2px);
+  z-index: 1;
+}
+
+.auth-hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.auth-hero-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth-hero-crest {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  background: #FFFFFF;
+  border: 2px solid var(--pu-gold);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  padding: 4px;
+}
+
+.auth-hero-titles h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+
+.auth-hero-titles p {
+  font-size: 13px;
+  color: var(--pu-gold-light);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.auth-hero-body {
+  margin: auto 0;
+  max-width: 540px;
+}
+
+.auth-hero-tagline {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #FFFFFF 25%, #FDE68A 65%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-hero-description {
+  font-size: 15px;
+  color: #E2E8F0;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.auth-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 24px;
+}
+
+.auth-stat-box h4 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--pu-gold-light);
+}
+
+.auth-stat-box p {
+  font-size: 12px;
+  color: #CBD5E1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-hero-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #94A3B8;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+}
+
+/* Right Form Pane */
+.auth-form-pane {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: var(--bg-surface);
+  position: relative;
+  overflow-y: auto;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+}
+
+.auth-card-header {
+  margin-bottom: 28px;
+}
+
+.auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.auth-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Timeout Notice Alert */
+.session-expired-banner {
+  display: none;
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  color: #DC2626;
+  font-size: 13.5px;
+  font-weight: 600;
+  align-items: center;
+  gap: 10px;
+  animation: shake 0.4s ease-in-out;
+}
+
+.session-expired-banner.show {
+  display: flex;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* Auth Navigation Tabs (Sign In / Register) */
+.auth-mode-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border-subtle);
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.auth-mode-tab {
+  padding: 10px 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.auth-mode-tab.active {
+  color: var(--pu-maroon-primary);
+}
+[data-theme="dark"] .auth-mode-tab.active {
+  color: var(--pu-gold-light);
+}
+
+.auth-mode-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: var(--pu-maroon-primary);
+  border-radius: var(--radius-full);
+}
+[data-theme="dark"] .auth-mode-tab.active::after {
+  background: var(--pu-gold-light);
+}
+
+/* Role Selector Buttons */
+.role-segmented-control {
+  display: flex;
+  background: var(--bg-subtle);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  gap: 4px;
+  border: 1px solid var(--border-subtle);
+}
+
+.role-pill {
+  flex: 1;
+  text-align: center;
+  padding: 9px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.role-pill:hover {
+  color: var(--text-primary);
+}
+
+.role-pill.active {
+  background: var(--bg-surface);
+  color: var(--pu-maroon-primary);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+}
+[data-theme="dark"] .role-pill.active {
+  color: var(--pu-gold-light);
+}
+
+/* Quick Demo Personas Bar */
+.demo-accounts-card {
+  margin-top: 28px;
+  padding: 16px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+}
+
+.demo-accounts-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-account-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.demo-btn {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.demo-btn:hover {
+  border-color: var(--pu-maroon-primary);
+  background: rgba(128, 0, 32, 0.05);
+}
+
+@media (max-width: 960px) {
+  .auth-hero-pane {
+    display: none;
+  }
+}
+
+/* Sign-In Page Dedicated Footer */
+.signin-page-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.signin-footer-banner {
+  max-width: 320px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: #FFFFFF;
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.signin-footer-meta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
